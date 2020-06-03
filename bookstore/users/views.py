@@ -1,5 +1,6 @@
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, reverse
+from django.core.paginator import Paginator
 from .models import Passport
 import re
 
@@ -97,3 +98,5 @@ def login_check(request):
 def logout(request):
     request.session.flush()
     return redirect(reverse('books:index'))
+
+
