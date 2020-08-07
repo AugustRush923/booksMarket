@@ -1,7 +1,8 @@
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, reverse
 from django.core.paginator import Paginator
-from .models import Passport
+from .models import Passport, Address
+from utils.decorators import login_required
 import re
 
 
@@ -39,7 +40,7 @@ def register_handler(request):
 
 
 def login(request):
-    '''显示登录页面'''
+    """显示登录页面"""
     if request.COOKIES.get('username'):
         username = request.COOKIES.get("username")
         checked = 'checked'
@@ -100,3 +101,18 @@ def logout(request):
     return redirect(reverse('books:index'))
 
 
+@login_required
+def user(request):
+    """用户中心-信息页"""
+    passport_id = request.session.get('passport_id')
+    # 获取用户基本信息
+    addr = Address.objects.get_default_address(passport_id)
+
+    books_li=[]
+
+    context = {
+        'addr': addr,
+        'page': user,
+        'books_li': books_li
+    }
+    return render(request, 'users/user_center_info.html', context)
