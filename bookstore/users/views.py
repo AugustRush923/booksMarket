@@ -69,7 +69,7 @@ def login_check(request):
 
     # 进行处理：根据用户名和密码查找账户信息
     passport = Passport.objects.get_one_passport(username, password)
-
+    print(passport)
     if password:
         next_url = reverse('books:index')
         jres = JsonResponse({
