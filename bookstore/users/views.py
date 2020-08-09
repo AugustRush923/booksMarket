@@ -1,6 +1,8 @@
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, reverse
 from django.core.paginator import Paginator
+
+from order.models import OrderInfo, OrderBooks
 from .models import Passport, Address
 from utils.decorators import login_required
 import re
@@ -116,3 +118,88 @@ def user(request):
         'books_li': books_li
     }
     return render(request, 'users/user_center_info.html', context)
+
+
+@login_required
+def address(request):
+    '''用户中心-地址也'''
+    # 获取登录用户的id
+    passport_id = request.session.get('passport_id')
+    print("in address")
+    if request.method == "GET":
+        # 显示地址页面
+        # 查询用户的默认地址
+        print("in if")
+        addr = Address.objects.get_default_address(passport_id)
+        return render(request, 'user/user_center_site.html', {'addr': addr, 'page': 'address'})
+
+    # 添加收货地址
+    # 1.接收数据
+    recipient_name = request.POST.get('username')
+    recipient_addr = request.POST.get('addr')
+    zip_code = request.POST.get('zip_code')
+    recipient_phone = request.POST.get('phone')
+
+    # 2.进行校验
+    if not all([recipient_name, recipient_addr, zip_code, recipient_phone]):
+        return render(request, 'user/user_center_site.html', {'errmsg': '参数不能为空'})
+
+    # 3.添加收货地址
+    Address.objects.add_one_address(passport_id, recipient_name, recipient_addr, zip_code, recipient_phone)
+
+    return redirect(reverse('user:address'))
+
+
+@login_required
+def order(request, page):
+    """用户中心-订单页"""
+
+    # 查询用户的订单信息
+    passport_id = request.session.get('passport_id')
+
+    # 获取订单信息
+    order_li = OrderInfo.objects.filter(passport_id)
+
+    # 遍历获取订单的商品信息
+    for order in order_li:
+        # 根据订单id查询订单商品信息
+        order_id = order.order_id
+        order_books_li = OrderBooks.objects.filter(order_id)
+
+        # 计算商品的小计
+        for order_books in order_books_li:
+            count = order_books.count
+            price = order_books.price
+            amount = count * price
+            # 保存订单中每一个商品的小计
+            order_books.amount = amount
+
+        # 给order对象动态增加一个属性order_books_li, 保存订单中商品的信息
+        order.order_books_li = order_books_li
+
+    paginator = Paginator(order_li, 3)
+
+    num_pages = paginator.num_pages
+    if not page:  # 首次进入时默认进入第一页
+        page = 1
+    if page == '' or int(page) > num_pages:
+        page = 1
+    else:
+        page = int(page)
+
+    order_li = paginator.page(page)
+
+    if num_pages < 5:
+        pages = range(1, num_pages + 1)
+    elif page <= 3:
+        pages = range(1, 6)
+    elif num_pages - page <= 2:
+        pages = range(num_pages - 4, num_pages + 1)
+    else:
+        pages = range(page - 2, page + 3)
+    context = {
+        'order_li': order_li,
+        'pages': pages,
+    }
+
+    return render(request, 'users/user_center_order.html', context)

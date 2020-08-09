@@ -19,7 +19,8 @@ from django.contrib import admin
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^tinymce/', include('tinymce.urls')),
-    url(r'^user/', include('users.urls', namespace='user')), # 用户模块
-    url(r'^', include('books.urls', namespace='books')), # 商品模块
-    url(r'^cart/', include('cart.urls', namespace='cart')), # 购物车模块
+    url(r'^user/', include('users.urls', namespace='user')),  # 用户模块
+    url(r'^', include('books.urls', namespace='books')),  # 商品模块
+    url(r'^cart/', include('cart.urls', namespace='cart')),  # 购物车模块
+    url(r'^order/', include('order.urls', namespace='order')),  # 订单模块
 ]
