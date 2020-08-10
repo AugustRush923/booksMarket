@@ -71,8 +71,7 @@ def login_check(request):
 
     # 进行处理：根据用户名和密码查找账户信息
     passport = Passport.objects.get_one_passport(username, password)
-    print(passport)
-    if password:
+    if passport:
         next_url = reverse('books:index')
         jres = JsonResponse({
             'res': 1,
@@ -82,7 +81,7 @@ def login_check(request):
 
         if remember == 'true':
             # 记住用户名
-            jres.set_cookie('username', username, max_age=7*24*3600)
+            jres.set_cookie('username', username, max_age=7 * 24 * 3600)
         else:
             jres.delete_cookie('username')
 
@@ -94,7 +93,7 @@ def login_check(request):
 
     else:
         return JsonResponse({
-            'res':0 # 用户名或密码错误
+            'res': 0  # 用户名或密码错误
         })
 
 
@@ -110,7 +109,7 @@ def user(request):
     # 获取用户基本信息
     addr = Address.objects.get_default_address(passport_id)
 
-    books_li=[]
+    books_li = []
 
     context = {
         'addr': addr,
@@ -122,32 +121,32 @@ def user(request):
 
 @login_required
 def address(request):
-    '''用户中心-地址也'''
+    """用户中心-地址页"""
     # 获取登录用户的id
     passport_id = request.session.get('passport_id')
-    print("in address")
-    if request.method == "GET":
+    print("passport_id:", passport_id)
+    if request.method == 'GET':
         # 显示地址页面
         # 查询用户的默认地址
         print("in if")
         addr = Address.objects.get_default_address(passport_id)
-        return render(request, 'user/user_center_site.html', {'addr': addr, 'page': 'address'})
+        return render(request, 'users/user_center_site.html', {'addr': addr, 'page': 'address'})
+    else:
+        # 添加收货地址
+        # 1.接收数据
+        recipient_name = request.POST.get('username')
+        recipient_addr = request.POST.get('addr')
+        zip_code = request.POST.get('zip_code')
+        recipient_phone = request.POST.get('phone')
 
-    # 添加收货地址
-    # 1.接收数据
-    recipient_name = request.POST.get('username')
-    recipient_addr = request.POST.get('addr')
-    zip_code = request.POST.get('zip_code')
-    recipient_phone = request.POST.get('phone')
+        # 2.进行校验
+        if not all([recipient_name, recipient_addr, zip_code, recipient_phone]):
+            return render(request, 'users/user_center_site.html', {'errmsg': '参数不能为空'})
 
-    # 2.进行校验
-    if not all([recipient_name, recipient_addr, zip_code, recipient_phone]):
-        return render(request, 'user/user_center_site.html', {'errmsg': '参数不能为空'})
+        # 3.添加收货地址
+        Address.objects.add_one_address(passport_id, recipient_name, recipient_addr, zip_code, recipient_phone)
 
-    # 3.添加收货地址
-    Address.objects.add_one_address(passport_id, recipient_name, recipient_addr, zip_code, recipient_phone)
-
-    return redirect(reverse('user:address'))
+        return redirect(reverse('user:address'))
 
 
 @login_required
@@ -158,13 +157,13 @@ def order(request, page):
     passport_id = request.session.get('passport_id')
 
     # 获取订单信息
-    order_li = OrderInfo.objects.filter(passport_id)
+    order_li = OrderInfo.objects.filter(passport_id=passport_id)
 
     # 遍历获取订单的商品信息
     for order in order_li:
         # 根据订单id查询订单商品信息
         order_id = order.order_id
-        order_books_li = OrderBooks.objects.filter(order_id)
+        order_books_li = OrderBooks.objects.filter(order_id=order_id)
 
         # 计算商品的小计
         for order_books in order_books_li:

@@ -1,16 +1,17 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
-{% block title %}尚硅谷书店-个人中心{% endblock title %}
-
+{% block title %}尚硅谷书店-首页{% endblock title %}
+{% block topfiles %}
+{% endblock topfiles %}
 {% block body %}
 
 	<div class="main_con clearfix">
 		<div class="left_menu_con clearfix">
 			<h3>用户中心</h3>
 			<ul>
-				<li><a href="user_center_info.html">· 个人信息</a></li>
-				<li><a href="user_center_order.html">· 全部订单</a></li>
-				<li><a href="user_center_site.html" class="active">· 收货地址</a></li>
+				<li><a href="{% url 'user:user' %}">· 个人信息</a></li>
+                <li><a href="{% url 'user:order' %}">· 全部订单</a></li>
+                <li><a href="{% url 'user:address' %}" class="active">· 收货地址</a></li>
 			</ul>
 		</div>
 		<div class="right_content clearfix">
