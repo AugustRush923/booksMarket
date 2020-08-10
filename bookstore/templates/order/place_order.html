@@ -11,7 +11,7 @@
         <dl>
             <dt>寄送到：</dt>
 <dd><input type="radio" name="addr_id" value="{{ addr.id }}" checked="">{{ addr.recipient_addr }} （{{ addr.recipient_name }} 收） {{ addr.recipient_phone }}</dd>        </dl>
-        <a href="user_center_site.html" class="edit_site">编辑收货地址</a>
+        <a href="{% url 'user:address'%}" class="edit_site">编辑收货地址</a>
 
     </div>
     
@@ -74,8 +74,6 @@
         <div class="mask"></div>
     </div>
 {% endblock bottom %}
-url(r'^commit/$', views.order_commit, name='commit'), # 生成订单
-然后改写前端页面place_order.html，来调用后端提交订单的接口。
 
 {% block bottomfiles %}
     <script type="text/javascript">
@@ -84,8 +82,8 @@ url(r'^commit/$', views.order_commit, name='commit'), # 生成订单
             var addr_id = $('input[name="addr_id"]').val()
             var pay_method = $('input[name="pay_style"]:checked').val()
             var books_ids = $(this).attr('books_ids')
-            var csrf = $('input[name="csrfmiddlewaretoken"]').val()
-            // alert(addr_id+':'+pay_method+':'+books_ids)
+            var csrf = '{{ csrf_token }}'
+            // alert(addr_id+':'+pay_method+':'+books_ids+':'+csrf)
             // 发起post请求， 访问/order/commit/
             var params = {
                 'addr_id': addr_id,

@@ -107,13 +107,14 @@ def order_commit(request):
     addr_id = request.POST.get('addr_id')
     pay_method = request.POST.get('pay_method')
     books_ids = request.POST.get('books_ids')
-
+    print(addr_id, pay_method, books_ids)
     # 进行数据校验
     if not all([addr_id, pay_method, books_ids]):
         return JsonResponse({'res': 1, 'errmsg': '数据不完整'})
 
     try:
-        addr = Address.objects.get(addr_id)
+        addr = Address.objects.get(id=addr_id)
+        print(addr)
     except Exception as e:
         return JsonResponse({'res': 2, 'errmsg': '地址信息错误'})
 
@@ -123,8 +124,10 @@ def order_commit(request):
     # 订单创建
     # 组织订单信息
     passport_id = request.session.get('passport_id')
+    print(passport_id)
     # 订单id: 20171029110830+用户的id
     order_id = datetime.now().strftime('%Y%m%d%H%M%S') + str(passport_id)
+    print(order_id)
     # 运费
     transit_price = 10
     # 订单商品总数和总金额
@@ -135,7 +138,13 @@ def order_commit(request):
     sid = transaction.savepoint()
     try:
         # 向订单信息表中添加一条记录
-        order = OrderInfo.objects.create(order_id, passport_id, addr_id, total_count, total_price, transit_price, pay_method)
+        order = OrderInfo.objects.create(order_id=order_id,
+                                         passport_id=passport_id,
+                                         addr_id=addr_id,
+                                         total_count=total_count,
+                                         total_price=total_price,
+                                         transit_price=transit_price,
+                                         pay_method=pay_method)
         # 向订单商品表中添加订单商品的记录
         books_ids = books_ids.split(',')
         conn = get_redis_connection('default')
