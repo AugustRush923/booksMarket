@@ -156,3 +156,13 @@ SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 SESSION_CACHE_ALIAS = "default"
 
 ALIPAY_URL='https://openapi.alipaydev.com/gateway.do'
+
+
+# EMail
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_USE_SSL = True
+EMAIL_HOST = 'smtp.qq.com'  # 如果是 163 改成 smtp.163.com
+EMAIL_PORT = 465
+EMAIL_HOST_USER = 'qbz95zhd@qq.com' # 帐号
+EMAIL_HOST_PASSWORD = 'rlfiwvemhxiggccj'  # 密码
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER

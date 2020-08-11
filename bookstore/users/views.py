@@ -1,11 +1,17 @@
+import re
+
+from django.conf import settings
+from django.core.mail import send_mail
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, reverse
 from django.core.paginator import Paginator
+from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+from itsdangerous import SignatureExpired
 
 from order.models import OrderInfo, OrderBooks
 from .models import Passport, Address
 from utils.decorators import login_required
-import re
+
 
 
 # Create your views here.
@@ -31,12 +37,26 @@ def register_handler(request):
 
     # 进行业务处理:注册，向账户系统中添加账户
     # Passport.objects.create(username=username, password=password, email=email)
-    try:
-        Passport.objects.add_one_passport(username=username, password=password, email=email)
-    except Exception as e:
-        print("e: ", e)  # 把异常打印出来
-        return render(request, 'users/register.html', {'errmsg': '用户名已存在！'})
+    # try:
+    #     Passport.objects.add_one_passport(username=username, password=password, email=email)
+    # except Exception as e:
+    #     print("e: ", e)  # 把异常打印出来
+    #     return render(request, 'users/register.html', {'errmsg': '用户名已存在！'})
+    p = Passport.objects.check_passport(username=username)
 
+    if p:
+        return render(request, 'users/register.html', {'errmsg': '用户名已经存在'})
+
+    # 进行业务处理:注册，向账户系统中添加账户
+    passport = Passport.objects.add_one_passport(username=username, password=password, email=email)
+
+    # 生成激活的token
+    serializer = Serializer(settings.SECRET_KEY, 3600)
+    token = serializer.dumps({'confirm': passport.id})
+    token = token.decode()
+
+    # 给用户的邮箱发送激活邮件
+    send_mail('用户激活', '', settings.EMAIL_FROM, [email], html_message='<a href="http://127.0.0.1:8000/user/active/%s/">http://127.0.0.1:8000/user/active/</a>' % token)
     # 注册完，还是返回注册页。
     return redirect(reverse('books:index'))
 
