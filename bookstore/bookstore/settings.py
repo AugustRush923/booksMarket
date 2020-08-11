@@ -164,5 +164,5 @@ EMAIL_USE_SSL = True
 EMAIL_HOST = 'smtp.qq.com'  # 如果是 163 改成 smtp.163.com
 EMAIL_PORT = 465
 EMAIL_HOST_USER = 'qbz95zhd@qq.com' # 帐号
-EMAIL_HOST_PASSWORD = 'rlfiwvemhxiggccj'  # 密码
+EMAIL_HOST_PASSWORD = ''  # 密码
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
