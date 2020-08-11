@@ -5,8 +5,10 @@ from .models import Books
 from .enums import *
 from django.core.urlresolvers import reverse
 from django.core.paginator import Paginator
+from django.views.decorators.cache import cache_page
 
 
+@cache_page(60 * 15)
 def index(request):
     '''显示首页'''
     # 查询每个种类的3个新品信息和4个销量最好的商品信息
@@ -102,13 +104,13 @@ def list(request, type_id, page):
     # 3.当前页是后3页，显示后5页 10 9 8 7
     # 4.其他情况，显示当前页前2页，后2页，当前页
     if num_pages < 5:
-        pages = range(1, num_pages+1)
+        pages = range(1, num_pages + 1)
     elif page <= 3:
-        pages = range(1,6)
+        pages = range(1, 6)
     elif num_pages - page <= 2:
-        pages = range(num_pages-4, num_pages+1)
+        pages = range(num_pages - 4, num_pages + 1)
     else:
-        pages = range(page-2, page+3)
+        pages = range(page - 2, page + 3)
 
     # 新书推荐
     books_new = Books.objects.get_books_by_type(type_id, limit=2, sort='new')

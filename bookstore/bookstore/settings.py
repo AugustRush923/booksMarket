@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'books',
     'order',
     'cart',
+    'comments',
     'tinymce',
 ]
 
