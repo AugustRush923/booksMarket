@@ -1,2 +1,2 @@
 # booksMarket
-Django-rest-framework开发的书城项目
+Django 开发的书城项目
